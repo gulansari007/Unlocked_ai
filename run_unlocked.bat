@@ -3,11 +3,48 @@ title Unlocked AI Launcher ⚡
 cd /d "%~dp0"
 
 echo =======================================================
-echo           ⚡ UNLOCKED AI TERMINAL CLIENT ⚡
+echo           ⚡ UNLOCKED AI LAUNCHER ⚡
 echo =======================================================
 echo.
 
-:: Check if the server is already running on port 8000
+:: 1. Check if virtual environment exists. If not, create and install packages.
+if not exist venv (
+    echo [FIRST LAUNCH] Setting up Python Virtual Environment...
+    python -m venv venv
+    if %errorlevel% neq 0 (
+        echo [ERROR] Failed to create Python virtual environment.
+        echo Please ensure Python 3.10+ is installed and added to your system PATH.
+        pause
+        exit /b %errorlevel%
+    )
+    
+    echo [INSTALLING] Activating environment and installing Unlocked AI dependencies...
+    call venv\Scripts\activate
+    python -m pip install --upgrade pip
+    pip install -e .
+    if %errorlevel% neq 0 (
+        echo [ERROR] Failed to install Unlocked AI package dependencies.
+        pause
+        exit /b %errorlevel%
+    )
+    echo [OK] Installation successfully completed!
+    echo.
+) else (
+    :: Activate existing virtual environment
+    call venv\Scripts\activate
+)
+
+:: 2. Check if configuration (.env) exists. If not, trigger onboarding wizard.
+if not exist .env (
+    echo [SETUP REQUIRED] Starting onboarding configuration wizard...
+    echo.
+    call unlocked onboard
+    echo.
+    echo Setup complete! Starting application...
+    echo.
+)
+
+:: 3. Check if the backend server is already running on port 8000
 netstat -ano | findstr :8000 >nul
 if %errorlevel% equ 0 (
     echo [OK] Unlocked AI Core Server is already running.
@@ -24,8 +61,7 @@ echo.
 echo [LAUNCHING] Starting interactive chat client...
 echo.
 
-:: Activate virtual environment and start terminal chat
-call venv\Scripts\activate
+:: Start terminal chat
 call unlocked chat
 
 echo.
