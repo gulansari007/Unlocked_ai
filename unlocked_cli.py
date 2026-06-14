@@ -31,11 +31,24 @@ custom_theme = Theme({
 console = Console(theme=custom_theme)
 
 async def main(ws_url: str = "ws://127.0.0.1:8000/ws"):
-    console.print(Panel.fit(
-        "[bold purple]⚡ Unlocked AI Terminal Client ⚡[/bold purple]\n"
+    # Print a premium, colored ASCII art title
+    console.print()
+    console.print("[bold purple]  _    _ _   _ _      ____   _____ _  __ ______ _____       _______ [/bold purple]")
+    console.print("[bold purple] | |  | | \\ | | |    / __ \\ / ____| |/ /|  ____|  __ \\     |__   __|[/bold purple]")
+    console.print("[bold purple] | |  | |  \\| | |   | |  | | |    | ' / | |__  | |  | |  __ _ | |   [/bold purple]")
+    console.print("[bold cyan] | |  | | . ` | |   | |  | | |    |  <  |  __| | |  | | / _` || |   [/bold cyan]")
+    console.print("[bold cyan] | |__| | |\\  | |___| |__| | |____| . \\ | |____| |__| || (_| || |   [/bold cyan]")
+    console.print("[bold cyan]  \\____/|_| \\_|______\\____/ \\_____|_|\\_\\|______|_____/  \\__,_||_|   [/bold cyan]")
+    console.print()
+
+    console.print(Panel(
+        "[bold white]⚡ Unified Developer Dashboard & Agentic Framework ⚡[/bold white]\n"
         "[dim]Interactive shell client connecting to Unlocked AI Core Server[/dim]",
-        border_style="purple"
+        border_style="purple",
+        title="[bold purple]v0.1.0[/bold purple]",
+        title_align="right"
     ))
+    console.print()
 
     # Test/Establish WebSocket connection
     try:
