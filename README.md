@@ -26,10 +26,11 @@ Unlocked AI is a premium Developer Dashboard and orchestration framework built w
 
 ## Installation & Setup 💻
 
-Follow these commands in your terminal to set up and run Unlocked AI:
+Follow the instructions matching your operating system/device:
 
-### 1. Initialize Virtual Environment
+### Option A: Standard Desktop (Windows, macOS, Linux)
 
+#### 1. Setup Virtual Environment
 ```bash
 # Navigate to project directory
 cd Unlockedd_ai
@@ -37,45 +38,80 @@ cd Unlockedd_ai
 # Create a virtual environment
 python -m venv venv
 
-# Activate the virtual environment (Windows)
+# Activate the environment (Windows)
 venv\Scripts\activate
 
-# Activate the virtual environment (macOS/Linux)
+# Activate the environment (macOS/Linux)
 source venv/bin/activate
 ```
 
-### 2. Install Dependencies
-
+#### 2. Install Package
+Installs the framework locally in editable mode and registers the CLI binary:
 ```bash
-pip install -r requirements.txt
+pip install -e .
 ```
 
-### 3. Run the Configuration Wizard
-
-Unlocked AI includes an interactive onboarding CLI wizard to securely save your API keys and configuration to a local `.env` file:
-
+#### 3. Configuration & Startup
+Run the onboarding keys wizard and start the server:
 ```bash
-python -m server.cli onboard
+# Set up LLM API keys
+unlocked onboard
+
+# Start the dashboard server
+unlocked start
+```
+
+---
+
+### Option B: Android Device (Termux)
+
+To run Unlocked AI locally on an Android phone/tablet:
+
+#### 1. Install Termux
+Download and install the latest Termux APK from [F-Droid (Termux page)](https://f-droid.org/en/packages/com.termux/). *Do not use the Google Play Store version.*
+
+#### 2. Install Compilers and Tools
+Open Termux and run the following to install Git, Python, and the Rust compiler (necessary to build packages like `pydantic-core` from source on Android):
+```bash
+pkg update && pkg upgrade -y
+pkg install git python rust clang make -y
+```
+
+#### 3. Clone and Install
+```bash
+# Clone the repository
+git clone https://github.com/gulansari007/Unlocked_ai.git
+cd Unlocked_ai
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Upgrade pip and install package
+pip install --upgrade pip
+pip install -e .
+```
+
+#### 4. Configure & Start
+```bash
+# Set up LLM API keys
+unlocked onboard
+
+# Start the dashboard server
+unlocked start
 ```
 
 ---
 
 ## Running the Application ⚙️
 
-### Start the Dashboard Server
-
-```bash
-python -m server.cli start --host 127.0.0.1 --port 8000
-```
-Once started, the Material 3 Developer Dashboard will be available at:
+Once the server is running (`unlocked start`), the Material 3 Developer Dashboard will be available at:
 👉 **[http://127.0.0.1:8000/](http://127.0.0.1:8000/)**
 
 ### Run Terminal Chat Client
-
-If you prefer to chat with the agent directly from your terminal, execute:
-
+If you prefer to chat with the agent directly inside your terminal session, run:
 ```bash
-python -m server.cli chat
+unlocked chat
 ```
 
 ---
