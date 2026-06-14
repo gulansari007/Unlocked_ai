@@ -10,6 +10,8 @@ from tools.system import (
     ReadFileTool, ListDirTool, SearchGrepTool, WriteFileTool, PatchFileTool,
     ExecuteCommandTool, StartApplicationTool, ListProcessesTool, KillProcessTool, WebSearchTool
 )
+from tools.scheduler import ManageRemindersTool
+from tools.productivity import ManageTodosTool, ManagePomodoroTool
 
 
 logger = logging.getLogger(__name__)
@@ -124,6 +126,9 @@ class CoordinatorAgent(BaseAgent):
         registry.register(ExecuteCommandTool())
         registry.register(StartApplicationTool())
         registry.register(KillProcessTool())
+        registry.register(ManageRemindersTool())
+        registry.register(ManageTodosTool())
+        registry.register(ManagePomodoroTool())
         
         # Peer delegation tools
         registry.register(DelegateReviewerTool(message_bus))
@@ -139,6 +144,10 @@ class CoordinatorAgent(BaseAgent):
             "- Use 'delegate_to_reviewer' for static analysis or checking script security.\n"
             "- Use 'delegate_to_scout' for finding files or grep searches in the workspace.\n"
             "- Use 'delegate_to_fetcher' for fetching online documentations.\n\n"
+            "You can also schedule, list, and cancel daily task reminders for the user using the 'manage_reminders' tool (e.g. to remind them to drink water, stand up, take breaks, or perform tasks at specific intervals).\n\n"
+            "Additionally, you can help the user organize their day-to-day productivity using:\n"
+            "- The 'manage_todos' tool to add tasks, list tasks, delete tasks, or check them off their Todo board.\n"
+            "- The 'manage_pomodoro' tool to start Pomodoro focus sessions (work sessions) or break timers, cancel them, or check their elapsed time.\n\n"
             "Analyze requirements, delegate when appropriate, and present structured plans to the user."
         )
 

@@ -24,6 +24,7 @@ __pycache__/
 .system_generated/
 browser/
 artifacts/
+.unlocked_todos.json
 
 # Editors and IDEs
 .vscode/

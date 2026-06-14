@@ -63,6 +63,32 @@ const sOpencodeUrl = $('s-opencode-url');
 
 
 
+// Reminders UI
+const remindersContainer = $('reminders-container');
+const addReminderBtn     = $('add-reminder-btn');
+const reminderScrim      = $('reminder-scrim');
+const rMessage           = $('r-message');
+const rInterval          = $('r-interval');
+const rRecurring         = $('r-recurring');
+const cancelReminderBtn  = $('cancel-reminder-btn');
+const saveReminderBtn    = $('save-reminder-btn');
+
+// Productivity Hub UI
+const tabPomoBtn = $('tab-pomo-btn');
+const tabTodoBtn = $('tab-todo-btn');
+const panelPomo  = $('panel-pomo');
+const panelTodo  = $('panel-todo');
+
+const pomoTimerText = $('pomo-timer-text');
+const pomoLabel     = $('pomo-label');
+const pomo25Btn     = $('pomo-25-btn');
+const pomo5Btn      = $('pomo-5-btn');
+const pomoStopBtn   = $('pomo-stop-btn');
+
+const todoListContainer = $('todo-list-container');
+const todoInput         = $('todo-input');
+const todoAddBtn        = $('todo-add-btn');
+
 // Misc
 const refreshFilesBtn = $('refresh-files-btn');
 
@@ -76,6 +102,14 @@ function connect() {
     setStatusChip(statusBadge, 'connected', 'Connected');
     loadProviders();
     loadFiles();
+    loadReminders();
+    loadTodos();
+    checkPomodoroStatus();
+
+    // Request notification permission if default
+    if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
   };
 
   ws.onclose = () => {
@@ -147,6 +181,26 @@ function handleMessage(msg) {
     case 'provider_updated':
     case 'config_updated':
       loadProviders();
+      break;
+
+    case 'reminder':
+      handleReminderTrigger(msg.data);
+      break;
+
+    case 'reminders_updated':
+      renderRemindersList(msg.data);
+      break;
+
+    case 'todos_updated':
+      renderTodosList(msg.data);
+      break;
+
+    case 'pomodoro_tick':
+      updatePomodoroUI(msg.data);
+      break;
+
+    case 'pomodoro_complete':
+      handlePomodoroComplete(msg.data);
       break;
 
     default:
@@ -572,6 +626,396 @@ function esc(s) {
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 
+// ── Reminders logic ───────────────────────────────────────────
+function playReminderSound() {
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const playBeep = (freq, time, duration) => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, time);
+      gain.gain.setValueAtTime(0.2, time);
+      gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
+      osc.start(time);
+      osc.stop(time + duration);
+    };
+
+    const now = audioCtx.currentTime;
+    playBeep(880, now, 0.2);
+    playBeep(1109, now + 0.15, 0.4);
+  } catch (e) {
+    console.error("Audio error:", e);
+  }
+}
+
+function handleReminderTrigger(data) {
+  playReminderSound();
+  appendLog('warning', `⏰ REMINDER ALERT: ${data.message}`);
+
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    new Notification("Unlocked AI Reminder ⏰", {
+      body: data.message,
+      icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏰</text></svg>"
+    });
+  }
+  loadReminders();
+}
+
+async function loadReminders() {
+  try {
+    const reminders = await fetch('/api/reminders').then(r => r.json());
+    renderRemindersList(reminders);
+  } catch (e) {
+    console.error("Error loading reminders:", e);
+  }
+}
+
+function renderRemindersList(reminders) {
+  remindersContainer.innerHTML = '';
+  
+  if (reminders.length === 0) {
+    remindersContainer.innerHTML = '<div class="loading-text" style="color: var(--md-on-surface-variant); font-size: var(--md-body-small); text-align: center; padding: 12px;">No active reminders</div>';
+    return;
+  }
+  
+  reminders.forEach(r => {
+    const item = el('div', 'reminder-item');
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.justifyContent = 'space-between';
+    item.style.gap = '8px';
+    item.style.padding = '8px 12px';
+    item.style.borderRadius = 'var(--md-shape-medium)';
+    item.style.background = 'var(--md-surface-container-high)';
+    item.style.marginBottom = '6px';
+    
+    const details = el('div');
+    details.style.flex = '1';
+    details.style.minWidth = '0';
+    
+    const msgText = el('div');
+    msgText.style.fontSize = 'var(--md-body-medium)';
+    msgText.style.color = 'var(--md-on-surface)';
+    msgText.style.fontWeight = '500';
+    msgText.style.textOverflow = 'ellipsis';
+    msgText.style.overflow = 'hidden';
+    msgText.style.whiteSpace = 'nowrap';
+    msgText.textContent = r.message;
+    
+    const intervalText = el('div');
+    intervalText.style.fontSize = 'var(--md-label-small)';
+    intervalText.style.color = 'var(--md-on-surface-variant)';
+    const recurStr = r.is_recurring ? 'recurring' : 'one-off';
+    intervalText.textContent = `every ${r.interval_minutes}m (${recurStr})`;
+    
+    details.append(msgText, intervalText);
+    
+    const cancelBtn = el('button', 'icon-btn');
+    cancelBtn.style.width = '28px';
+    cancelBtn.style.height = '28px';
+    cancelBtn.style.fontSize = '12px';
+    cancelBtn.style.color = 'var(--md-error)';
+    cancelBtn.style.border = 'none';
+    cancelBtn.style.background = 'transparent';
+    cancelBtn.style.cursor = 'pointer';
+    cancelBtn.textContent = '✕';
+    cancelBtn.title = 'Cancel reminder';
+    
+    cancelBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await cancelReminder(r.id);
+    });
+    
+    item.append(details, cancelBtn);
+    remindersContainer.appendChild(item);
+  });
+}
+
+async function cancelReminder(id) {
+  try {
+    const res = await fetch('/api/reminders/cancel', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ reminder_id: id })
+    });
+    if (res.ok) {
+      appendLog('info', '✓ Reminder cancelled');
+      loadReminders();
+    }
+  } catch (e) {
+    console.error("Error cancelling reminder:", e);
+  }
+}
+
+async function addReminder() {
+  const message = rMessage.value.trim();
+  const interval = parseFloat(rInterval.value);
+  const isRecurring = rRecurring.checked;
+  
+  if (!message) {
+    alert("Please enter a reminder message.");
+    return;
+  }
+  if (isNaN(interval) || interval <= 0) {
+    alert("Please enter a valid positive interval in minutes.");
+    return;
+  }
+  
+  try {
+    const res = await fetch('/api/reminders/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message,
+        interval_minutes: interval,
+        is_recurring: isRecurring
+      })
+    });
+    
+    if (res.ok) {
+      appendLog('info', `✓ Scheduled reminder: "${message}"`);
+      closeDialog(reminderScrim);
+      rMessage.value = '';
+      rInterval.value = '1';
+      loadReminders();
+    } else {
+      const err = await res.json();
+      alert(`Failed to add reminder: ${err.detail}`);
+    }
+  } catch (e) {
+    alert(`Network error: ${e.message}`);
+  }
+}
+
+// ── Productivity Hub logic ───────────────────────────────────────
+// Tab switches
+function switchTab(tab) {
+  if (tab === 'pomo') {
+    tabPomoBtn.classList.add('active');
+    tabTodoBtn.classList.remove('active');
+    tabPomoBtn.style.background = 'var(--md-secondary-container)';
+    tabPomoBtn.style.color = 'var(--md-on-secondary-container)';
+    tabTodoBtn.style.background = 'transparent';
+    tabTodoBtn.style.color = 'var(--md-on-surface-variant)';
+    panelPomo.style.display = 'flex';
+    panelTodo.style.display = 'none';
+  } else {
+    tabTodoBtn.classList.add('active');
+    tabPomoBtn.classList.remove('active');
+    tabTodoBtn.style.background = 'var(--md-secondary-container)';
+    tabTodoBtn.style.color = 'var(--md-on-secondary-container)';
+    tabPomoBtn.style.background = 'transparent';
+    tabPomoBtn.style.color = 'var(--md-on-surface-variant)';
+    panelTodo.style.display = 'flex';
+    panelPomo.style.display = 'none';
+  }
+}
+
+// Pomodoro Timer
+async function checkPomodoroStatus() {
+  try {
+    const status = await fetch('/api/pomodoro').then(r => r.json());
+    updatePomodoroUI(status);
+  } catch (e) {
+    console.error("Error checking Pomodoro status:", e);
+  }
+}
+
+async function startPomodoro(minutes, type) {
+  try {
+    const res = await fetch('/api/pomodoro/start', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ duration_minutes: minutes, session_type: type })
+    });
+    if (res.ok) {
+      appendLog('info', `🍅 Started Pomodoro ${type} timer (${minutes}m)`);
+      const status = await res.json();
+      updatePomodoroUI(status);
+    }
+  } catch (e) {
+    console.error("Error starting Pomodoro:", e);
+  }
+}
+
+async function stopPomodoro() {
+  try {
+    const res = await fetch('/api/pomodoro/stop', { method: 'POST' });
+    if (res.ok) {
+      appendLog('info', '🍅 Stopped Pomodoro timer');
+      checkPomodoroStatus();
+    }
+  } catch (e) {
+    console.error("Error stopping Pomodoro:", e);
+  }
+}
+
+function updatePomodoroUI(status) {
+  if (status.active) {
+    const mins = Math.floor(status.remaining_seconds / 60);
+    const secs = status.remaining_seconds % 60;
+    pomoTimerText.textContent = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    pomoLabel.textContent = status.session_type;
+    pomoLabel.style.color = status.session_type === 'focus' ? 'var(--md-primary)' : 'var(--md-tertiary)';
+    pomoTimerText.style.color = status.session_type === 'focus' ? 'var(--md-primary)' : 'var(--md-tertiary)';
+    
+    // Show stop button, hide presets
+    pomoStopBtn.style.display = 'inline-block';
+    pomo25Btn.style.display = 'none';
+    pomo5Btn.style.display = 'none';
+  } else {
+    pomoTimerText.textContent = '25:00';
+    pomoLabel.textContent = 'Ready';
+    pomoLabel.style.color = 'var(--md-on-surface-variant)';
+    pomoTimerText.style.color = 'var(--md-on-surface-variant)';
+    
+    // Hide stop button, show presets
+    pomoStopBtn.style.display = 'none';
+    pomo25Btn.style.display = 'inline-block';
+    pomo5Btn.style.display = 'inline-block';
+  }
+}
+
+function handlePomodoroComplete(data) {
+  playReminderSound();
+  appendLog('warning', `🍅 POMODORO COMPLETE: Your ${data.session_type} session is finished.`);
+  
+  if (typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+    new Notification("Pomodoro Complete! 🍅", {
+      body: `Your ${data.session_type} session has finished.`,
+      icon: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍅</text></svg>"
+    });
+  }
+  checkPomodoroStatus();
+}
+
+// Todos (Tasks)
+async function loadTodos() {
+  try {
+    const todos = await fetch('/api/todos').then(r => r.json());
+    renderTodosList(todos);
+  } catch (e) {
+    console.error("Error loading todos:", e);
+  }
+}
+
+function renderTodosList(todos) {
+  todoListContainer.innerHTML = '';
+  
+  if (todos.length === 0) {
+    todoListContainer.innerHTML = '<div class="loading-text" style="color: var(--md-on-surface-variant); font-size: var(--md-body-small); text-align: center; padding: 12px;">No active tasks</div>';
+    return;
+  }
+  
+  todos.forEach(t => {
+    const item = el('div', 'todo-item');
+    item.style.display = 'flex';
+    item.style.alignItems = 'center';
+    item.style.justifyContent = 'space-between';
+    item.style.gap = '8px';
+    item.style.padding = '6px 8px';
+    item.style.borderRadius = 'var(--md-shape-small)';
+    item.style.background = 'var(--md-surface-container-high)';
+    
+    const details = el('div');
+    details.style.display = 'flex';
+    details.style.alignItems = 'center';
+    details.style.gap = '8px';
+    details.style.flex = '1';
+    details.style.minWidth = '0';
+    
+    const checkbox = el('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = t.completed;
+    checkbox.style.cursor = 'pointer';
+    checkbox.style.accentColor = 'var(--md-primary)';
+    checkbox.addEventListener('change', async (e) => {
+      e.stopPropagation();
+      await toggleTodo(t.id);
+    });
+    
+    const text = el('span');
+    text.style.fontSize = '12px';
+    text.style.color = t.completed ? 'var(--md-on-surface-variant)' : 'var(--md-on-surface)';
+    text.style.textDecoration = t.completed ? 'line-through' : 'none';
+    text.style.textOverflow = 'ellipsis';
+    text.style.overflow = 'hidden';
+    text.style.whiteSpace = 'nowrap';
+    text.textContent = t.text;
+    
+    details.append(checkbox, text);
+    
+    const delBtn = el('button');
+    delBtn.style.border = 'none';
+    delBtn.style.background = 'transparent';
+    delBtn.style.color = 'var(--md-error)';
+    delBtn.style.cursor = 'pointer';
+    delBtn.style.fontSize = '11px';
+    delBtn.textContent = '🗑';
+    delBtn.title = 'Delete task';
+    
+    delBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      await deleteTodo(t.id);
+    });
+    
+    item.append(details, delBtn);
+    todoListContainer.appendChild(item);
+  });
+}
+
+async function addTodo() {
+  const text = todoInput.value.trim();
+  if (!text) return;
+  
+  try {
+    const res = await fetch('/api/todos/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text })
+    });
+    if (res.ok) {
+      todoInput.value = '';
+      loadTodos();
+    }
+  } catch (e) {
+    console.error("Error adding todo:", e);
+  }
+}
+
+async function toggleTodo(id) {
+  try {
+    const res = await fetch('/api/todos/toggle', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todo_id: id })
+    });
+    if (res.ok) {
+      loadTodos();
+    }
+  } catch (e) {
+    console.error("Error toggling todo:", e);
+  }
+}
+
+async function deleteTodo(id) {
+  try {
+    const res = await fetch('/api/todos/delete', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ todo_id: id })
+    });
+    if (res.ok) {
+      loadTodos();
+    }
+  } catch (e) {
+    console.error("Error deleting todo:", e);
+  }
+}
+
 // ── Auto-resize textarea ─────────────────────────────────────
 promptInput.addEventListener('input', () => {
   promptInput.style.height = 'auto';
@@ -613,6 +1057,22 @@ settingsScrim.addEventListener('click', e => { if (e.target === settingsScrim) c
 
 // File refresh
 refreshFilesBtn.onclick = loadFiles;
+
+// Reminders
+addReminderBtn.onclick = () => openDialog(reminderScrim);
+cancelReminderBtn.onclick = () => { closeDialog(reminderScrim); rMessage.value = ''; rInterval.value = '1'; };
+saveReminderBtn.onclick = addReminder;
+reminderScrim.addEventListener('click', e => { if (e.target === reminderScrim) closeDialog(reminderScrim); });
+
+// Productivity Hub (Pomodoro + Todos)
+tabPomoBtn.onclick = () => switchTab('pomo');
+tabTodoBtn.onclick = () => switchTab('todo');
+pomo25Btn.onclick  = () => startPomodoro(25, 'focus');
+pomo5Btn.onclick   = () => startPomodoro(5, 'break');
+pomoStopBtn.onclick = stopPomodoro;
+
+todoAddBtn.onclick = addTodo;
+todoInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.stopPropagation(); addTodo(); } });
 
 // Scrim backdrop closes on click
 approvalScrim.addEventListener('click', e => {

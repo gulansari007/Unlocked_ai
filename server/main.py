@@ -23,6 +23,8 @@ from tools.base import ExecutionMode
 from agents.events import event_bus, LogBroadcastHandler
 from server.shell import PersistentShell
 from server.telegram_bot import TelegramBotService
+from server.scheduler import reminder_scheduler
+from server.productivity import todo_manager, pomodoro_manager
 
 
 # Set up logging with our custom broadcast handler
@@ -138,6 +140,9 @@ async def startup_event():
     await shell.start()
     # Start Telegram Bot Service
     tg_bot.start()
+    # Inject Telegram Bot into reminder scheduler and pomodoro manager
+    reminder_scheduler.tg_bot = tg_bot
+    pomodoro_manager.tg_bot = tg_bot
     logger.info("Unlocked AI Server started and agents initialized.")
 
 @app.on_event("shutdown")
@@ -148,6 +153,9 @@ async def shutdown_event():
     await shell.stop()
     # Stop Telegram Bot Service
     await tg_bot.stop()
+    # Cancel all pending reminders and pomodoro sessions
+    reminder_scheduler.clear()
+    pomodoro_manager.stop()
     logger.info("Unlocked AI Server stopped cleanly.")
 
 
@@ -157,6 +165,27 @@ async def shutdown_event():
 class FileWriteRequest(BaseModel):
     path: str
     content: str
+
+class ReminderAddRequest(BaseModel):
+    message: str
+    interval_minutes: float
+    is_recurring: bool = True
+
+class ReminderCancelRequest(BaseModel):
+    reminder_id: str
+
+class TodoAddRequest(BaseModel):
+    text: str
+
+class TodoToggleRequest(BaseModel):
+    todo_id: str
+
+class TodoDeleteRequest(BaseModel):
+    todo_id: str
+
+class PomodoroStartRequest(BaseModel):
+    duration_minutes: float
+    session_type: str = "focus"
 
 class ProviderSelectRequest(BaseModel):
     provider_model: str
@@ -204,6 +233,82 @@ def get_directory_tree(path: str) -> list:
     # Sort folders first, then files
     tree.sort(key=lambda x: (x["type"] != "directory", x["name"].lower()))
     return tree
+
+@app.get("/api/reminders")
+async def api_get_reminders():
+    """Returns all active reminders."""
+    return reminder_scheduler.get_all_reminders()
+
+@app.post("/api/reminders/add")
+async def api_add_reminder(payload: ReminderAddRequest):
+    """Adds a new reminder."""
+    reminder = reminder_scheduler.add_reminder(
+        message=payload.message,
+        interval_minutes=payload.interval_minutes,
+        is_recurring=payload.is_recurring
+    )
+    return {
+        "status": "success",
+        "reminder": {
+            "id": reminder.id,
+            "message": reminder.message,
+            "interval_minutes": reminder.interval_minutes,
+            "is_recurring": reminder.is_recurring
+        }
+    }
+
+@app.post("/api/reminders/cancel")
+async def api_cancel_reminder(payload: ReminderCancelRequest):
+    """Cancels an existing reminder."""
+    success = reminder_scheduler.cancel_reminder(payload.reminder_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Reminder not found or already completed.")
+    return {"status": "success"}
+
+@app.get("/api/todos")
+async def api_get_todos():
+    """Returns all todo tasks."""
+    return todo_manager.get_all()
+
+@app.post("/api/todos/add")
+async def api_add_todo(payload: TodoAddRequest):
+    """Adds a new todo task."""
+    return todo_manager.add(payload.text)
+
+@app.post("/api/todos/toggle")
+async def api_toggle_todo(payload: TodoToggleRequest):
+    """Toggles a todo task completion status."""
+    todo = todo_manager.toggle(payload.todo_id)
+    if not todo:
+        raise HTTPException(status_code=404, detail="Task not found.")
+    return todo
+
+@app.post("/api/todos/delete")
+async def api_delete_todo(payload: TodoDeleteRequest):
+    """Deletes a todo task."""
+    success = todo_manager.delete(payload.todo_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Task not found.")
+    return {"status": "success"}
+
+@app.get("/api/pomodoro")
+async def api_get_pomodoro():
+    """Returns the current Pomodoro timer status."""
+    return pomodoro_manager.get_status()
+
+@app.post("/api/pomodoro/start")
+async def api_start_pomodoro(payload: PomodoroStartRequest):
+    """Starts a Pomodoro focus or break session."""
+    return pomodoro_manager.start(
+        duration_minutes=payload.duration_minutes,
+        session_type=payload.session_type
+    )
+
+@app.post("/api/pomodoro/stop")
+async def api_stop_pomodoro():
+    """Stops the active Pomodoro session."""
+    pomodoro_manager.stop()
+    return {"status": "success"}
 
 @app.get("/api/files")
 async def api_get_files():

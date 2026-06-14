@@ -93,6 +93,15 @@ class TelegramBotService:
         for chat_id in list(self.chat_ids):
             await self._send_message(chat_id, text, reply_markup)
 
+    async def send_reminder_notification(self, text: str):
+        """Relays a reminder message to all active chat sessions."""
+        if not self.chat_ids:
+            return
+        
+        text_msg = f"⏰ *REMINDER:*\n{text}"
+        for chat_id in list(self.chat_ids):
+            await self._send_message(chat_id, text_msg)
+
     async def _handle_callback_query(self, query: dict):
         chat_id = query["message"]["chat"]["id"]
         query_id = query["id"]
