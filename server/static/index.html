@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Unlocked AI — Material 3 Developer Dashboard with real-time agent reasoning, persistent terminal, and multi-provider LLM routing.">
+  <title>Unlocked AI — Developer Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-shell">
+
+  <!-- ── Top App Bar ──────────────────────────────────── -->
+  <header class="top-app-bar" role="banner">
+    <div class="nav-icon" aria-label="Menu" role="button" tabindex="0">⚡</div>
+    <h1 class="app-title">Unlocked <span>AI</span></h1>
+    <div class="top-bar-actions">
+      <div id="status-badge"  class="status-chip disconnected" role="status" aria-live="polite">
+        <div class="chip-dot"></div><span>Offline</span>
+      </div>
+      <div id="agent-badge" class="status-chip" role="status" aria-live="polite">
+        <div class="chip-dot"></div><span>Agent Idle</span>
+      </div>
+      <button id="settings-btn" class="icon-btn" title="Configure API Keys" aria-label="Settings" aria-haspopup="dialog">⚙️</button>
+    </div>
+  </header>
+
+  <!-- ── Body Layout (Rail + Workspace) ───────────────── -->
+  <div class="body-layout">
+
+    <!-- ── Navigation Rail ──────────────────────────── -->
+    <nav class="nav-rail" aria-label="Main navigation">
+      <div class="rail-item active" data-panel="config" role="button" tabindex="0" aria-label="Configuration">
+        <div class="rail-indicator">🤖</div>
+        <span class="rail-label">Providers</span>
+      </div>
+      <div class="rail-item" data-panel="files" role="button" tabindex="0" aria-label="Files">
+        <div class="rail-indicator">📁</div>
+        <span class="rail-label">Files</span>
+      </div>
+      <div class="rail-item" data-panel="console" role="button" tabindex="0" aria-label="Agent Console">
+        <div class="rail-indicator">🔮</div>
+        <span class="rail-label">Console</span>
+      </div>
+      <div class="rail-item" data-panel="terminal" role="button" tabindex="0" aria-label="Terminal">
+        <div class="rail-indicator">💻</div>
+        <span class="rail-label">Terminal</span>
+      </div>
+    </nav>
+
+    <!-- ── Three-Column Workspace ────────────────────── -->
+    <main class="workspace" role="main">
+
+      <!-- ── Left Panel: Providers + Files ─────────── -->
+      <aside class="panel-left" aria-label="Configuration and file explorer">
+
+        <!-- Provider Switcher Card -->
+        <div class="md-card" id="providers-card">
+          <div class="card-header">
+            <span class="card-header-icon">🤖</span>
+            <div>
+              <div class="card-title">LLM Provider</div>
+              <div class="card-subtitle">Active model routing</div>
+            </div>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-body" style="padding-top: 10px;">
+            <div class="provider-list" id="providers-container">
+              <div class="loading-text">Loading providers…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- File Explorer Card -->
+        <div class="md-card" style="flex: 1; min-height: 0;">
+          <div class="card-header">
+            <span class="card-header-icon">📁</span>
+            <div>
+              <div class="card-title">Workspace Files</div>
+              <div class="card-subtitle">Click to view contents</div>
+            </div>
+            <button id="refresh-files-btn" class="icon-btn" title="Refresh" aria-label="Refresh file tree" style="font-size: 16px;">🔄</button>
+          </div>
+          <div class="card-divider"></div>
+          <div class="card-body" style="padding: 8px 12px 12px;">
+            <div class="file-tree" id="file-tree" role="tree" aria-label="Workspace file tree">
+              <div class="loading-text">Loading directory…</div>
+            </div>
+          </div>
+        </div>
+
+      </aside>
+
+      <!-- ── Center Panel: Agent Console ───────────── -->
+      <section class="md-card panel-center" aria-label="Agent reasoning console">
+        <div class="card-header">
+          <span class="card-header-icon">🔮</span>
+          <div>
+            <div class="card-title">Agent Console</div>
+            <div class="card-subtitle">Thoughts, tools &amp; responses</div>
+          </div>
+        </div>
+        <div class="card-divider"></div>
+
+        <!-- Stream area -->
+        <div class="console-stream" id="chat-stream" role="log" aria-live="polite" aria-label="Agent execution log">
+          <div class="console-empty-state" id="console-empty">
+            <div class="empty-icon">🔮</div>
+            <h2 class="empty-headline">Unlocked AI Coordinator</h2>
+            <p class="empty-body">Enter a prompt below to start the planner and build loops. Agent thoughts, delegations and tool execution will appear here in real‑time.</p>
+          </div>
+        </div>
+
+        <!-- Prompt Input Bar -->
+        <div class="prompt-bar">
+          <div class="prompt-textarea-wrap">
+            <textarea
+              id="prompt-input"
+              class="prompt-textarea"
+              placeholder="Ask the coordinator to plan or build something…"
+              rows="1"
+              aria-label="Prompt input"
+            ></textarea>
+          </div>
+          <button id="run-btn" class="fab" title="Execute Agent" aria-label="Execute agent">
+            <span class="fab-icon">▶</span>
+            <span>Run</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- ── Right Panel: Persistent Terminal ──────── -->
+      <section class="md-card panel-right" aria-label="Persistent shell terminal">
+        <div class="card-header">
+          <span class="card-header-icon">💻</span>
+          <div>
+            <div class="card-title">Isolated Terminal</div>
+            <div class="card-subtitle" id="terminal-cwd-label">Persistent shell session</div>
+          </div>
+          <button id="clear-terminal-btn" class="icon-btn" title="Clear terminal" aria-label="Clear terminal output" style="font-size: 15px;">🗑</button>
+        </div>
+        <div class="card-divider"></div>
+
+        <div class="terminal-surface" id="terminal-view" role="log" aria-label="Terminal output" aria-live="polite">
+          <div class="terminal-welcome-text">Unlocked AI — Persistent PowerShell Session
+Type commands to run them in the shared agent context.
+──────────────────────────────────────────────</div>
+        </div>
+
+        <div class="terminal-input-row">
+          <span class="terminal-prompt-label" id="terminal-cwd">/workspace $</span>
+          <input
+            type="text"
+            id="terminal-input"
+            class="terminal-cmd-input"
+            placeholder="Type a command…"
+            aria-label="Terminal command input"
+            autocomplete="off"
+            spellcheck="false"
+          >
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     DIALOG: Human-in-the-Loop Approval
+════════════════════════════════════════════════════════ -->
+<div class="dialog-scrim" id="approval-scrim" role="dialog" aria-modal="true" aria-labelledby="approval-headline">
+  <div class="dialog">
+    <div class="dialog-icon warning-icon">⚠️</div>
+    <h2 class="dialog-headline" id="approval-headline">Action Requires Approval</h2>
+    <div class="dialog-body">
+      <p>The agent is requesting permission to execute a mutating tool call.</p>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <div class="detail-row">
+          <span class="detail-key">Agent:</span>
+          <span class="detail-val" id="approval-agent">coordinator</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-key">Tool:</span>
+          <span class="detail-val" id="approval-tool">execute_command</span>
+        </div>
+        <div class="detail-key" style="margin-top:4px;">Arguments:</div>
+        <div class="detail-block" id="approval-args">{}</div>
+      </div>
+      <div class="text-field">
+        <label for="approval-feedback">Rejection reason <span style="font-weight:300;">(optional)</span></label>
+        <input type="text" id="approval-feedback" placeholder="Provide feedback if rejecting…">
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button id="reject-btn"  class="text-btn error">Reject</button>
+      <button id="approve-btn" class="filled-btn">Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     DIALOG: File Viewer
+════════════════════════════════════════════════════════ -->
+<div class="dialog-scrim" id="file-scrim" role="dialog" aria-modal="true" aria-labelledby="file-dialog-title">
+  <div class="dialog file-dialog">
+    <div class="dialog-title-row">
+      <span style="font-size:18px;">📄</span>
+      <span class="dialog-title-text" id="file-dialog-title">File Contents</span>
+      <button class="icon-btn" id="close-file-btn" aria-label="Close file viewer">✕</button>
+    </div>
+    <div class="dialog-body">
+      <div class="file-code-area">
+        <pre><code id="file-content"></code></pre>
+      </div>
+    </div>
+    <div class="dialog-actions">
+      <button class="text-btn" id="close-file-btn2">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════
+     DIALOG: Settings / API Config
+════════════════════════════════════════════════════════ -->
+<div class="dialog-scrim" id="settings-scrim" role="dialog" aria-modal="true" aria-labelledby="settings-headline">
+  <div class="dialog">
+    <div class="dialog-icon" style="color: var(--md-secondary)">⚙️</div>
+    <h2 class="dialog-headline" id="settings-headline">Configure API Keys</h2>
+    <div class="dialog-body">
+      <p>Credentials are saved to your local <code style="font-family:'Roboto Mono',monospace; background:var(--md-surface-container-highest); padding:1px 5px; border-radius:4px;">.env</code> file and applied immediately — no restart needed.</p>
+
+      <div class="text-field">
+        <label for="s-gemini">Google Gemini API Key</label>
+        <input type="password" id="s-gemini" placeholder="AIzaSy…">
+        <span class="supporting-text">From Google AI Studio — free tier available</span>
+      </div>
+
+      <div class="text-field">
+        <label for="s-groq">Groq API Key</label>
+        <input type="password" id="s-groq" placeholder="gsk_…">
+        <span class="supporting-text">Ultra-fast inference — free tier available</span>
+      </div>
+
+      <div class="text-field">
+        <label for="s-openrouter">OpenRouter API Key</label>
+        <input type="password" id="s-openrouter" placeholder="sk-or-…">
+        <span class="supporting-text">Routes to 100+ models including free options</span>
+      </div>
+
+      <div class="text-field">
+        <label for="s-ollama">Ollama Base URL</label>
+        <input type="text" id="s-ollama" placeholder="http://localhost:11434">
+        <span class="supporting-text">Local model server — no API key required</span>
+      </div>
+
+      <div class="list-divider"></div>
+
+      <div class="text-field">
+        <label for="s-openai">OpenAI API Key</label>
+        <input type="password" id="s-openai" placeholder="sk-proj-…">
+        <span class="supporting-text">Standard OpenAI key</span>
+      </div>
+
+      <div class="text-field">
+        <label for="s-openai-url">OpenAI Base URL</label>
+        <input type="text" id="s-openai-url" placeholder="https://api.openai.com/v1">
+      </div>
+
+      <div class="text-field">
+        <label for="s-anthropic">Anthropic API Key</label>
+        <input type="password" id="s-anthropic" placeholder="sk-ant-…">
+        <span class="supporting-text">Standard Anthropic key</span>
+      </div>
+
+      <div class="text-field">
+        <label for="s-anthropic-url">Anthropic Base URL</label>
+        <input type="text" id="s-anthropic-url" placeholder="https://api.anthropic.com/v1">
+      </div>
+
+      <div class="text-field">
+        <label for="s-telegram">Telegram Bot Token</label>
+        <input type="password" id="s-telegram" placeholder="123456789:ABCdefGhIJK...">
+        <span class="supporting-text">Telegram bot token from @BotFather for remote control and tool approval alerts</span>
+      </div>
+
+
+      <div class="list-divider"></div>
+
+      <div class="text-field">
+        <label for="s-opencode">OpenCode API Key</label>
+        <input type="password" id="s-opencode" placeholder="opencode_…">
+      </div>
+
+      <div class="text-field">
+        <label for="s-opencode-url">OpenCode Base URL</label>
+        <input type="text" id="s-opencode-url" placeholder="https://api.opencode.example.com/v1">
+      </div>
+
+    </div>
+    <div class="dialog-actions">
+      <button class="text-btn" id="cancel-settings-btn">Cancel</button>
+      <button class="filled-btn tonal" id="save-settings-btn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

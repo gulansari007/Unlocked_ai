@@ -1,0 +1,1214 @@
+/* ============================================================
+   UNLOCKED AI — Material 3 Design System
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
+
+/* ─── M3 Color Tokens ─────────────────────────────────────── */
+:root {
+  /* Primary */
+  --md-primary:              #D0BCFF;
+  --md-on-primary:           #381E72;
+  --md-primary-container:    #4F378B;
+  --md-on-primary-container: #EADDFF;
+
+  /* Secondary */
+  --md-secondary:              #CCC2DC;
+  --md-on-secondary:           #332D41;
+  --md-secondary-container:    #4A4458;
+  --md-on-secondary-container: #E8DEF8;
+
+  /* Tertiary */
+  --md-tertiary:              #EFB8C8;
+  --md-on-tertiary:           #492532;
+  --md-tertiary-container:    #633B48;
+  --md-on-tertiary-container: #FFD8E4;
+
+  /* Error */
+  --md-error:              #F2B8B5;
+  --md-on-error:           #601410;
+  --md-error-container:    #8C1D18;
+  --md-on-error-container: #F9DEDC;
+
+  /* Surface */
+  --md-background:          #1C1B1F;
+  --md-on-background:       #E6E1E5;
+  --md-surface:             #1C1B1F;
+  --md-on-surface:          #E6E1E5;
+  --md-surface-variant:     #49454F;
+  --md-on-surface-variant:  #CAC4D0;
+  --md-outline:             #938F99;
+  --md-outline-variant:     #49454F;
+
+  /* Surface containers (tonal elevation) */
+  --md-surface-dim:         #141218;
+  --md-surface-container-lowest:  #0F0D13;
+  --md-surface-container-low:     #1D1B20;
+  --md-surface-container:         #211F26;
+  --md-surface-container-high:    #2B2930;
+  --md-surface-container-highest: #36343B;
+
+  /* Inverse */
+  --md-inverse-surface:    #E6E1E5;
+  --md-inverse-on-surface: #313033;
+  --md-inverse-primary:    #6750A4;
+
+  /* Scrim & Shadow */
+  --md-scrim:   rgba(0,0,0,0.55);
+  --md-shadow:  rgba(0,0,0,0.40);
+
+  /* ─── Typography scale ──────────────────────────────────── */
+  --md-display-large:   57px;
+  --md-display-medium: 45px;
+  --md-display-small:  36px;
+  --md-headline-large:  32px;
+  --md-headline-medium: 28px;
+  --md-headline-small:  24px;
+  --md-title-large:  22px;
+  --md-title-medium: 16px;
+  --md-title-small:  14px;
+  --md-label-large:  14px;
+  --md-label-medium: 12px;
+  --md-label-small:  11px;
+  --md-body-large:   16px;
+  --md-body-medium:  14px;
+  --md-body-small:   12px;
+
+  /* ─── Shape (corner radius) ─────────────────────────────── */
+  --md-shape-none:       0px;
+  --md-shape-extra-small: 4px;
+  --md-shape-small:       8px;
+  --md-shape-medium:     12px;
+  --md-shape-large:      16px;
+  --md-shape-extra-large: 28px;
+  --md-shape-full:       999px;
+
+  /* ─── Motion ─────────────────────────────────────────────── */
+  --md-motion-standard:      cubic-bezier(0.2, 0, 0, 1);
+  --md-motion-emphasized:    cubic-bezier(0.3, 0, 0, 1);
+  --md-motion-decelerated:   cubic-bezier(0, 0, 0, 1);
+  --md-motion-duration-short2: 100ms;
+  --md-motion-duration-short4: 200ms;
+  --md-motion-duration-medium2: 300ms;
+  --md-motion-duration-long2:  500ms;
+
+  /* ─── Elevation overlays ────────────────────────────────── */
+  --md-elev-0: transparent;
+  --md-elev-1: rgba(208, 188, 255, 0.05);
+  --md-elev-2: rgba(208, 188, 255, 0.08);
+  --md-elev-3: rgba(208, 188, 255, 0.11);
+  --md-elev-4: rgba(208, 188, 255, 0.12);
+  --md-elev-5: rgba(208, 188, 255, 0.14);
+}
+
+/* ─── Global Reset & Base ───────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { height: 100%; }
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--md-background);
+  color: var(--md-on-background);
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Scrollbars (M3 minimal) ───────────────────────────────── */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--md-outline-variant); border-radius: var(--md-shape-full); }
+::-webkit-scrollbar-thumb:hover { background: var(--md-outline); }
+
+/* ─── Elevation mixin helper ────────────────────────────────── */
+.md-elevation-1 { background-color: var(--md-surface-container-low); }
+.md-elevation-2 { background-color: var(--md-surface-container); }
+.md-elevation-3 { background-color: var(--md-surface-container-high); }
+.md-elevation-4 { background-color: var(--md-surface-container-highest); }
+
+/* ═══════════════════════════════════════════════════════════════
+   APP SHELL
+═══════════════════════════════════════════════════════════════ */
+.app-shell {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ─── Top App Bar ───────────────────────────────────────────── */
+.top-app-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: var(--md-surface-container);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 16px;
+  height: 64px;
+  border-bottom: 1px solid var(--md-outline-variant);
+  /* M3 shadow for top bar */
+  box-shadow: 0 1px 2px var(--md-shadow);
+}
+
+.top-app-bar .nav-icon {
+  width: 48px; height: 48px;
+  border-radius: var(--md-shape-full);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  cursor: pointer;
+  transition: background-color var(--md-motion-duration-short2) var(--md-motion-standard);
+  position: relative; overflow: hidden;
+}
+
+.top-app-bar .nav-icon:hover::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--md-on-surface);
+  opacity: 0.08;
+  border-radius: inherit;
+}
+
+.app-title {
+  flex: 1;
+  font-size: var(--md-title-large);
+  font-weight: 500;
+  letter-spacing: 0;
+  color: var(--md-on-surface);
+}
+
+.app-title span {
+  color: var(--md-primary);
+}
+
+.top-bar-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ─── Status Chips (M3 Assist Chip) ────────────────────────── */
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: var(--md-shape-small);
+  border: 1px solid var(--md-outline-variant);
+  background: transparent;
+  font-size: var(--md-label-large);
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+  cursor: default;
+  transition:
+    background-color var(--md-motion-duration-short2) var(--md-motion-standard),
+    border-color var(--md-motion-duration-short2) var(--md-motion-standard),
+    color var(--md-motion-duration-short2) var(--md-motion-standard);
+  position: relative;
+  overflow: hidden;
+}
+
+.status-chip .chip-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background-color: var(--md-outline);
+  transition: background-color var(--md-motion-duration-short2) var(--md-motion-standard);
+  flex-shrink: 0;
+}
+
+/* Chip States */
+.status-chip.connected {
+  color: #A9DCBD;
+  border-color: #A9DCBD;
+  background: rgba(169, 220, 189, 0.08);
+}
+.status-chip.connected .chip-dot { background-color: #A9DCBD; box-shadow: 0 0 8px #A9DCBD66; }
+
+.status-chip.disconnected {
+  color: var(--md-error);
+  border-color: var(--md-error-container);
+  background: rgba(242,184,181, 0.05);
+}
+.status-chip.disconnected .chip-dot { background-color: var(--md-error); }
+
+.status-chip.running {
+  color: #FDD663;
+  border-color: #FDD663;
+  background: rgba(253, 214, 99, 0.08);
+  animation: chip-pulse 1.4s infinite alternate var(--md-motion-standard);
+}
+.status-chip.running .chip-dot { background-color: #FDD663; box-shadow: 0 0 6px #FDD66388; }
+
+@keyframes chip-pulse {
+  from { box-shadow: none; }
+  to   { box-shadow: 0 0 12px rgba(253,214,99,0.25); }
+}
+
+/* ─── Icon Button (M3) ───────────────────────────────────────── */
+.icon-btn {
+  width: 48px; height: 48px;
+  border-radius: var(--md-shape-full);
+  border: none;
+  background: transparent;
+  color: var(--md-on-surface-variant);
+  font-size: 20px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  transition: color var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.icon-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.icon-btn:hover::before { opacity: 0.08; }
+.icon-btn:active::before { opacity: 0.12; }
+
+.icon-btn.filled {
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+}
+.icon-btn.filled:hover::before { background: var(--md-on-primary); opacity: 0.08; }
+
+/* ═══════════════════════════════════════════════════════════════
+   NAVIGATION RAIL + CONTENT LAYOUT
+═══════════════════════════════════════════════════════════════ */
+.body-layout {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* ─── Navigation Rail (M3) ───────────────────────────────────── */
+.nav-rail {
+  width: 80px;
+  background-color: var(--md-surface-container-low);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0;
+  gap: 4px;
+  border-right: 1px solid var(--md-outline-variant);
+  flex-shrink: 0;
+  overflow: hidden;
+}
+
+.rail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  width: 100%;
+  cursor: pointer;
+  user-select: none;
+}
+
+.rail-indicator {
+  width: 56px; height: 32px;
+  border-radius: var(--md-shape-full);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+  position: relative; overflow: hidden;
+  transition: background-color var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.rail-indicator::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--md-on-surface);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.rail-item:hover .rail-indicator::before { opacity: 0.08; }
+
+.rail-item.active .rail-indicator {
+  background-color: var(--md-secondary-container);
+}
+.rail-item.active .rail-indicator::before { display: none; }
+
+.rail-label {
+  font-size: var(--md-label-medium);
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+}
+.rail-item.active .rail-label { color: var(--md-on-surface); }
+
+/* ─── Three-column workspace ─────────────────────────────────── */
+.workspace {
+  display: grid;
+  grid-template-columns: 300px 1fr 400px;
+  gap: 12px;
+  padding: 12px;
+  flex: 1;
+  overflow: hidden;
+  background: var(--md-surface-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   M3 CARD COMPONENT
+═══════════════════════════════════════════════════════════════ */
+.md-card {
+  background-color: var(--md-surface-container-low);
+  border-radius: var(--md-shape-extra-large);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+}
+
+.md-card.filled {
+  background-color: var(--md-surface-container);
+}
+
+.md-card.outlined {
+  background: transparent;
+  border: 1px solid var(--md-outline-variant);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px 8px;
+  gap: 12px;
+}
+
+.card-header-icon {
+  color: var(--md-primary);
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.card-title {
+  font-size: var(--md-title-medium);
+  font-weight: 500;
+  color: var(--md-on-surface);
+  letter-spacing: 0.1px;
+  flex: 1;
+}
+
+.card-subtitle {
+  font-size: var(--md-body-small);
+  color: var(--md-on-surface-variant);
+  letter-spacing: 0.4px;
+}
+
+.card-divider {
+  height: 1px;
+  background: var(--md-outline-variant);
+  margin: 4px 0;
+}
+
+.card-body {
+  padding: 8px 16px 16px;
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEFT PANEL — Config & File Explorer
+═══════════════════════════════════════════════════════════════ */
+.panel-left {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Section label (M3 category label) ─────────────────────── */
+.section-label {
+  font-size: var(--md-label-small);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--md-primary);
+  padding: 0 4px;
+  margin-bottom: 4px;
+}
+
+/* ─── Provider Cards ─────────────────────────────────────────── */
+.provider-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.provider-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 12px;
+  border-radius: var(--md-shape-medium);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: background-color var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.provider-item::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--md-on-surface);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.provider-item:hover::before { opacity: 0.08; }
+.provider-item:active::before { opacity: 0.12; }
+
+.provider-item.active {
+  background-color: var(--md-secondary-container);
+}
+.provider-item.active::before { display: none; }
+.provider-item.active .provider-name { color: var(--md-on-secondary-container); font-weight: 500; }
+.provider-item.active .provider-model { color: var(--md-on-secondary-container); opacity: 0.72; }
+
+.provider-item.disabled {
+  opacity: 0.38;
+  pointer-events: none;
+}
+
+.provider-badge {
+  width: 36px; height: 36px;
+  border-radius: var(--md-shape-small);
+  background-color: var(--md-surface-container-high);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.provider-item.active .provider-badge {
+  background-color: rgba(208,188,255,0.12);
+}
+
+.provider-text { flex: 1; min-width: 0; }
+
+.provider-name {
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.provider-model {
+  font-size: var(--md-label-small);
+  color: var(--md-on-surface-variant);
+  font-family: 'Roboto Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.provider-check {
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--md-outline);
+  flex-shrink: 0;
+  transition: all var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.provider-item.active .provider-check {
+  border-color: var(--md-primary);
+  background: var(--md-primary);
+  display: flex; align-items: center; justify-content: center;
+}
+
+.provider-item.active .provider-check::after {
+  content: '✓';
+  font-size: 11px;
+  color: var(--md-on-primary);
+  font-weight: 700;
+}
+
+/* ─── File Tree ─────────────────────────────────────────────── */
+.file-tree { overflow-y: auto; flex: 1; }
+
+.tree-node { user-select: none; }
+
+.tree-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: var(--md-shape-extra-small);
+  cursor: pointer;
+  font-size: var(--md-body-small);
+  color: var(--md-on-surface-variant);
+  position: relative;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: 'Roboto Mono', monospace;
+  transition: color var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.tree-row::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--md-on-surface);
+  opacity: 0;
+  border-radius: inherit;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.tree-row:hover::before { opacity: 0.08; }
+.tree-row:hover { color: var(--md-on-surface); }
+
+.tree-icon { font-size: 14px; flex-shrink: 0; }
+
+.tree-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tree-children {
+  padding-left: 14px;
+  border-left: 1px solid var(--md-outline-variant);
+  margin-left: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   CENTER PANEL — Agent Console
+═══════════════════════════════════════════════════════════════ */
+.panel-center {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  overflow: hidden;
+}
+
+.console-stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* ─── Welcome State ──────────────────────────────────────────── */
+.console-empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  padding: 32px;
+}
+
+.empty-icon {
+  width: 72px; height: 72px;
+  border-radius: var(--md-shape-full);
+  background-color: var(--md-primary-container);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  animation: gentle-float 3.5s infinite ease-in-out alternate;
+}
+
+@keyframes gentle-float {
+  from { transform: translateY(0px); }
+  to   { transform: translateY(-8px); }
+}
+
+.empty-headline {
+  font-size: var(--md-headline-small);
+  font-weight: 400;
+  color: var(--md-on-surface);
+}
+
+.empty-body {
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface-variant);
+  max-width: 380px;
+  line-height: 1.6;
+}
+
+/* ─── Thought Card ───────────────────────────────────────────── */
+.thought-card {
+  background-color: var(--md-surface-container);
+  border-radius: var(--md-shape-large);
+  padding: 14px 16px;
+  border-left: 3px solid var(--md-primary);
+}
+
+.thought-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.thought-agent-chip {
+  background: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  font-size: var(--md-label-small);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--md-shape-full);
+  letter-spacing: 0.4px;
+}
+
+.thought-type-label {
+  font-size: var(--md-label-small);
+  font-weight: 500;
+  color: var(--md-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.thought-body {
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+/* ─── Tool Log Card ──────────────────────────────────────────── */
+.tool-card {
+  background-color: var(--md-surface-container);
+  border-radius: var(--md-shape-large);
+  overflow: hidden;
+}
+
+.tool-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  background-color: var(--md-tertiary-container);
+}
+
+.tool-card-icon { font-size: 18px; }
+
+.tool-card-title {
+  font-size: var(--md-label-large);
+  font-weight: 600;
+  color: var(--md-on-tertiary-container);
+  flex: 1;
+}
+
+.tool-card-status {
+  font-size: var(--md-label-small);
+  padding: 2px 8px;
+  border-radius: var(--md-shape-full);
+  background: rgba(255,255,255,0.12);
+  color: var(--md-on-tertiary-container);
+}
+
+.tool-card-body {
+  padding: 12px 16px;
+}
+
+.tool-output {
+  background: var(--md-surface-container-highest);
+  border-radius: var(--md-shape-medium);
+  padding: 10px 12px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  color: var(--md-on-surface-variant);
+  max-height: 180px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  margin-top: 8px;
+}
+
+/* ─── Log Entry ──────────────────────────────────────────────── */
+.log-entry {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px 12px;
+  border-radius: var(--md-shape-small);
+  font-size: var(--md-body-small);
+}
+
+.log-entry.info  { background: rgba(208,188,255,0.05); border-left: 2px solid var(--md-primary); }
+.log-entry.warning { background: rgba(253,214,99,0.05); border-left: 2px solid #FDD663; }
+.log-entry.error { background: rgba(242,184,181,0.05); border-left: 2px solid var(--md-error); }
+
+.log-time {
+  font-family: 'Roboto Mono', monospace;
+  font-size: var(--md-label-small);
+  color: var(--md-on-surface-variant);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.log-text { color: var(--md-on-surface); line-height: 1.5; }
+
+/* ─── Final Response Card ────────────────────────────────────── */
+.response-card {
+  background: linear-gradient(135deg, rgba(79,55,139,0.35) 0%, rgba(99,59,72,0.25) 100%);
+  border: 1px solid var(--md-primary-container);
+  border-radius: var(--md-shape-extra-large);
+  padding: 20px 20px;
+}
+
+.response-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: var(--md-label-large);
+  font-weight: 600;
+  color: var(--md-primary);
+  letter-spacing: 0.3px;
+}
+
+.response-body {
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface);
+  line-height: 1.65;
+  white-space: pre-wrap;
+}
+
+/* ─── Prompt Input Bar ───────────────────────────────────────── */
+.prompt-bar {
+  padding: 12px 16px;
+  background-color: var(--md-surface-container-low);
+  border-top: 1px solid var(--md-outline-variant);
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.prompt-textarea-wrap {
+  flex: 1;
+  background-color: var(--md-surface-container-highest);
+  border-radius: var(--md-shape-extra-large);
+  border: 1px solid var(--md-outline-variant);
+  transition: border-color var(--md-motion-duration-short2) var(--md-motion-standard);
+  padding: 12px 16px;
+}
+
+.prompt-textarea-wrap:focus-within {
+  border-color: var(--md-primary);
+  box-shadow: 0 0 0 1px var(--md-primary);
+}
+
+.prompt-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface);
+  resize: none;
+  height: 40px;
+  max-height: 120px;
+  overflow-y: auto;
+  line-height: 1.5;
+}
+
+.prompt-textarea::placeholder { color: var(--md-on-surface-variant); }
+
+/* ─── M3 FAB Button ─────────────────────────────────────────── */
+.fab {
+  height: 56px;
+  min-width: 56px;
+  padding: 0 20px;
+  border-radius: var(--md-shape-large);
+  border: none;
+  background-color: var(--md-primary-container);
+  color: var(--md-on-primary-container);
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-label-large);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  position: relative; overflow: hidden;
+  transition:
+    background-color var(--md-motion-duration-short2) var(--md-motion-standard),
+    box-shadow var(--md-motion-duration-short2) var(--md-motion-standard);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+  flex-shrink: 0;
+}
+
+.fab::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--md-on-primary-container);
+  opacity: 0;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.fab:hover { box-shadow: 0 6px 10px rgba(0,0,0,0.30); }
+.fab:hover::before { opacity: 0.08; }
+.fab:active { box-shadow: 0 2px 4px rgba(0,0,0,0.20); }
+.fab:active::before { opacity: 0.12; }
+.fab:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
+
+.fab-icon { font-size: 18px; }
+
+/* ═══════════════════════════════════════════════════════════════
+   RIGHT PANEL — Persistent Shell Terminal
+═══════════════════════════════════════════════════════════════ */
+.panel-right {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.terminal-surface {
+  flex: 1;
+  background-color: var(--md-surface-container-lowest);
+  padding: 14px;
+  overflow-y: auto;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12.5px;
+  color: var(--md-on-surface);
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.terminal-welcome-text {
+  color: var(--md-on-surface-variant);
+  border-bottom: 1px dashed var(--md-outline-variant);
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+}
+
+.terminal-cmd-line { color: var(--md-primary); }
+.terminal-output   { color: var(--md-on-surface); }
+.terminal-error    { color: var(--md-error); }
+
+.terminal-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  background: var(--md-surface-container-low);
+  border-top: 1px solid var(--md-outline-variant);
+}
+
+.terminal-prompt-label {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--md-tertiary);
+  flex-shrink: 0;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.terminal-cmd-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  color: var(--md-on-surface);
+  caret-color: var(--md-primary);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DIALOGS / MODALS (M3)
+═══════════════════════════════════════════════════════════════ */
+.dialog-scrim {
+  position: fixed; inset: 0;
+  background: var(--md-scrim);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--md-motion-duration-medium2) var(--md-motion-standard);
+}
+
+.dialog-scrim.open {
+  opacity: 1;
+  pointer-events: all;
+}
+
+.dialog {
+  background: var(--md-surface-container-high);
+  border-radius: var(--md-shape-extra-large);
+  width: min(520px, 90vw);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform: scale(0.92) translateY(16px);
+  transition: transform var(--md-motion-duration-medium2) var(--md-motion-emphasized);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.45);
+}
+
+.dialog-scrim.open .dialog {
+  transform: scale(1) translateY(0);
+}
+
+.dialog-icon {
+  padding: 24px 24px 0;
+  font-size: 28px;
+  text-align: center;
+  color: var(--md-secondary);
+}
+
+.dialog-headline {
+  padding: 16px 24px 0;
+  font-size: var(--md-headline-small);
+  font-weight: 400;
+  color: var(--md-on-surface);
+}
+
+.dialog-body {
+  padding: 16px 24px;
+  overflow-y: auto;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface-variant);
+  line-height: 1.5;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px 24px 24px;
+}
+
+/* ─── M3 Text Button ─────────────────────────────────────────── */
+.text-btn {
+  height: 40px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  border-radius: var(--md-shape-full);
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-label-large);
+  font-weight: 500;
+  color: var(--md-primary);
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  letter-spacing: 0.1px;
+  transition: color var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.text-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.text-btn:hover::before { opacity: 0.08; }
+.text-btn:active::before { opacity: 0.12; }
+.text-btn.error { color: var(--md-error); }
+.text-btn.success { color: #A9DCBD; }
+
+/* ─── M3 Filled Button ───────────────────────────────────────── */
+.filled-btn {
+  height: 40px;
+  padding: 0 24px;
+  border: none;
+  border-radius: var(--md-shape-full);
+  background: var(--md-primary);
+  color: var(--md-on-primary);
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-label-large);
+  font-weight: 500;
+  letter-spacing: 0.1px;
+  cursor: pointer;
+  position: relative; overflow: hidden;
+  transition:
+    background-color var(--md-motion-duration-short2) var(--md-motion-standard),
+    box-shadow var(--md-motion-duration-short2) var(--md-motion-standard);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+.filled-btn::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: var(--md-on-primary);
+  opacity: 0;
+  transition: opacity var(--md-motion-duration-short2) var(--md-motion-standard);
+}
+
+.filled-btn:hover { box-shadow: 0 2px 4px rgba(0,0,0,0.30); }
+.filled-btn:hover::before { opacity: 0.08; }
+.filled-btn:active::before { opacity: 0.12; }
+.filled-btn.tonal {
+  background: var(--md-secondary-container);
+  color: var(--md-on-secondary-container);
+}
+.filled-btn.tonal::before { background: var(--md-on-secondary-container); }
+.filled-btn.error {
+  background: var(--md-error-container);
+  color: var(--md-on-error-container);
+}
+.filled-btn.error::before { background: var(--md-on-error-container); }
+
+/* ─── M3 Text Field ─────────────────────────────────────────── */
+.text-field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.text-field label {
+  font-size: var(--md-body-small);
+  font-weight: 500;
+  color: var(--md-on-surface-variant);
+  letter-spacing: 0.4px;
+}
+
+.text-field input {
+  background-color: var(--md-surface-container-highest);
+  border: 1px solid var(--md-outline-variant);
+  border-radius: var(--md-shape-extra-small);
+  padding: 10px 14px;
+  font-family: 'Roboto', sans-serif;
+  font-size: var(--md-body-medium);
+  color: var(--md-on-surface);
+  outline: none;
+  transition:
+    border-color var(--md-motion-duration-short2) var(--md-motion-standard),
+    box-shadow var(--md-motion-duration-short2) var(--md-motion-standard);
+  width: 100%;
+}
+
+.text-field input:focus {
+  border-color: var(--md-primary);
+  border-width: 2px;
+  padding: 9px 13px;
+}
+
+.text-field input::placeholder { color: var(--md-on-surface-variant); opacity: 0.7; }
+
+/* ─── Supporting text for text fields ───────────────────────── */
+.supporting-text {
+  font-size: var(--md-body-small);
+  color: var(--md-on-surface-variant);
+  padding: 0 2px;
+}
+
+/* ─── Detail block (JSON/args display) ──────────────────────── */
+.detail-block {
+  background: var(--md-surface-container-highest);
+  border-radius: var(--md-shape-medium);
+  padding: 12px 14px;
+  font-family: 'Roboto Mono', monospace;
+  font-size: 12px;
+  color: var(--md-on-surface-variant);
+  max-height: 220px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  line-height: 1.55;
+}
+
+/* ─── Approval Dialog special header ────────────────────────── */
+.warning-icon { color: #FDD663; }
+.error-color  { color: var(--md-error); }
+
+/* ─── File Dialog ────────────────────────────────────────────── */
+.dialog.file-dialog {
+  width: min(860px, 95vw);
+  height: 80vh;
+}
+
+.file-dialog .dialog-body {
+  max-height: unset;
+  flex: 1;
+  padding: 0;
+  overflow: hidden;
+}
+
+.file-code-area {
+  height: 100%;
+  overflow: auto;
+  padding: 16px 24px;
+  background: var(--md-surface-container-lowest);
+}
+
+.file-code-area pre {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 13px;
+  color: var(--md-on-surface);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.dialog-title-row {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px 0;
+  gap: 8px;
+}
+
+.dialog-title-text {
+  flex: 1;
+  font-size: var(--md-title-medium);
+  font-weight: 500;
+  color: var(--md-on-surface);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* ─── Request details rows ───────────────────────────────────── */
+.detail-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: var(--md-body-medium);
+}
+
+.detail-key {
+  color: var(--md-on-surface-variant);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.detail-val {
+  color: var(--md-on-surface);
+  font-family: 'Roboto Mono', monospace;
+  font-size: var(--md-label-large);
+  background: rgba(208,188,255,0.1);
+  padding: 1px 6px;
+  border-radius: var(--md-shape-extra-small);
+}
+
+/* ─── List Divider ───────────────────────────────────────────── */
+.list-divider {
+  height: 1px;
+  background: var(--md-outline-variant);
+  margin: 8px 0;
+}
+
+/* ─── Loading text ───────────────────────────────────────────── */
+.loading-text {
+  color: var(--md-on-surface-variant);
+  font-size: var(--md-body-small);
+  font-style: italic;
+  padding: 4px 0;
+}
